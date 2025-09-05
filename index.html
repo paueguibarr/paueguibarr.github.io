@@ -1,17 +1,229 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Portfolio</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CSCI 581 • Computer Vision Portfolio</title>
+  <style>
+    :root{
+      --bg: #0f1226;
+      --bg-soft: rgba(255,255,255,0.06);
+      --card: rgba(255,255,255,0.08);
+      --text:#e9ecf1;
+      --muted:#b7bdd1;
+      --accent:#6ee7f5;
+      --accent-2:#a78bfa;
+      --ring: rgba(110,231,245,.55);
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f7f8fc;
+        --bg-soft:#ffffffcc;
+        --card:#ffffff;
+        --text:#0e1325;
+        --muted:#4a5572;
+        --accent:#2563eb;
+        --accent-2:#7c3aed;
+        --ring: rgba(37,99,235,.35);
+      }
+    }
+
+    /* Base */
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 10% -20%, #3b82f680 0%, transparent 55%),
+        radial-gradient(1000px 500px at 110% 10%, #22d3ee60 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+    }
+    .wrap{
+      width:min(1100px, 92vw);
+      margin:48px auto 80px;
+    }
+
+    /* Hero */
+    .hero{
+      position:relative;
+      padding:28px 24px;
+      border-radius:22px;
+      background:linear-gradient(180deg, var(--bg-soft), transparent 60%);
+      backdrop-filter:saturate(130%) blur(6px);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .hero h1{
+      margin:0 0 6px;
+      font-size:clamp(28px, 3vw, 44px);
+      line-height:1.1;
+      letter-spacing:.3px;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size:clamp(14px, 1.7vw, 18px);
+      margin:0;
+    }
+    .chips{
+      margin-top:16px;
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .chip{
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    /* Projects Grid */
+    .section-title{
+      margin:28px 4px 12px;
+      font-size:18px;
+      color:var(--muted);
+      letter-spacing:.3px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat( auto-fit, minmax(260px, 1fr) );
+      gap:16px;
+    }
+    .card{
+      display:block;
+      padding:18px;
+      border-radius:18px;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.10);
+      text-decoration:none;
+      color:inherit;
+      position:relative;
+      overflow:hidden;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .card:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px -12px var(--ring);
+      border-color: var(--ring);
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-weight:600; font-size:12px;
+      color:var(--accent);
+      padding:6px 10px; border-radius:999px;
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .title{ margin:10px 0 4px; font-size:20px; font-weight:700 }
+    .desc{ margin:0 0 12px; color:var(--muted); font-size:14px; line-height:1.45 }
+    .tags{ display:flex; gap:8px; flex-wrap:wrap }
+    .tag{
+      font-size:12px; color:var(--muted);
+      padding:6px 10px; border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .go{
+      position:absolute; right:14px; top:14px;
+      width:34px; height:34px; border-radius:50%;
+      display:grid; place-items:center;
+      background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.18);
+      color:var(--accent-2);
+      transition: transform .18s ease;
+      font-weight:700;
+    }
+    .card:hover .go{ transform: translateX(2px) }
+
+    /* Footer */
+    footer{
+      margin-top:28px;
+      padding:18px 6px;
+      color:var(--muted);
+      font-size:13px;
+      display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+      border-top:1px dashed rgba(255,255,255,.12);
+    }
+    a.inline{
+      color:var(--accent);
+      text-underline-offset:3px;
+      text-decoration: none;
+      border-bottom: 1px dashed transparent;
+    }
+    a.inline:hover{ border-bottom-color: currentColor }
+
+    /* Focus styles */
+    .card:focus-visible, .go:focus-visible, a.inline:focus-visible{
+      outline: 3px solid var(--ring);
+      outline-offset: 2px;
+    }
+
+    /* Tiny enter animation */
+    .card{ opacity:0; transform:translateY(6px) }
+    .card:nth-child(1){ animation:fadeUp .35s .02s forwards }
+    .card:nth-child(2){ animation:fadeUp .35s .07s forwards }
+    .card:nth-child(3){ animation:fadeUp .35s .12s forwards }
+    @keyframes fadeUp{
+      to{ opacity:1; transform:translateY(0) }
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to My CSCI581 Portfolio!</h1>
-    <a href="./0/index.html">Project 0</a>
-    <a href="./1/index.html">Project 1</a>
+  <div class="wrap">
+    <header class="hero" role="banner" aria-label="Course header">
+      <h1>🧠📷 CSCI 581 — Computer Vision Portfolio</h1>
+      <p class="subtitle">Projects and experiments from my course. Built with PyTorch, NumPy, and curiosity.</p>
+      <div class="chips">
+        <span class="chip">Fall 2025</span>
+        <span class="chip">Python • PyTorch</span>
+        <span class="chip">CV • ML</span>
+      </div>
+    </header>
+
+    <h2 class="section-title">Projects</h2>
+    <main class="grid" role="main">
+      <!-- Project 0 -->
+      <a class="card" href="./0/index.html" aria-label="Open Project 0">
+        <span class="go">↗</span>
+        <span class="badge">Project 0 • Setup</span>
+        <h3 class="title">Environment & Data Pipeline</h3>
+        <p class="desc">Conda setup, dataset loaders, and a softmax regression baseline on Fashion-MNIST.</p>
+        <div class="tags">
+          <span class="tag">datasets</span>
+          <span class="tag">softmax</span>
+          <span class="tag">metrics</span>
+        </div>
+      </a>
+
+      <!-- Project 1 -->
+      <a class="card" href="./1/index.html" aria-label="Open Project 1">
+        <span class="go">↗</span>
+        <span class="badge">Project 1 • CNN</span>
+        <h3 class="title">LeNet Variants & Training</h3>
+        <p class="desc">Classic LeNet with ReLU/MaxPool, training curves, and comparisons on MNIST & Fashion-MNIST.</p>
+        <div class="tags">
+          <span class="tag">CNN</span>
+          <span class="tag">ReLU</span>
+          <span class="tag">MaxPool</span>
+        </div>
+      </a>
+
+      <!-- Add more projects here as they’re ready -->
+    </main>
+
+    <footer>
+      <span>© <span id="y"></span> · CSCI 581 Portfolio</span>
+      <span>Made with <a class="inline" href="https://pytorch.org/" target="_blank" rel="noopener">PyTorch</a></span>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
