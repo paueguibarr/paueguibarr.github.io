@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project 0 — CSCI 581</title>
+  <link rel="stylesheet" href="../site.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <a class="inline" href="../index.html">← Back to Home</a>
+      <h1>Project 0 — Environment & Data Pipeline</h1>
+      <p class="subtitle">Conda setup, dataset loaders, and a softmax baseline.</p>
+    </header>
+
+    <h2 class="section-title">Overview</h2>
+    <main class="grid">
+      <article class="card">
+        <h3 class="title">Goals</h3>
+        <p class="desc">Describe what you set up and why (env, packages, GPU/MPS, data dirs).</p>
+      </article>
+
+      <article class="card">
+        <h3 class="title">Methods</h3>
+        <p class="desc">Data transforms, loaders, batch size, LR, and model settings.</p>
+      </article>
+
+      <article class="card">
+        <h3 class="title">Results</h3>
+        <p class="desc">Training curves and accuracy.</p>
+        <img src="./assets/curves.png" alt="Training/validation curves"
+             style="max-width:100%; border-radius:14px;">
+      </article>
+
+      <article class="card">
+        <h3 class="title">Artifacts</h3>
+        <p class="desc">
+          <a class="inline" href="./notebook.ipynb">Notebook</a> ·
+          <a class="inline" href="./report.pdf">Report (PDF)</a> ·
+          <a class="inline" href="./weights.pt">Model Weights</a>
+        </p>
+      </article>
+    </main>
+
+    <footer>
+      <span>© <span id="y"></span> · CSCI 581 Portfolio</span>
+      <span><a class="inline" href="../index.html">Home</a></span>
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
