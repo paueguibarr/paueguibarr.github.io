@@ -219,6 +219,26 @@
     color: var(--muted);
     text-align: center;
   }
+
+  .img-grid-2{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+  .img-grid-2 img{
+    width: 100%;
+    aspect-ratio: 4 / 3;   /* choose the shape you want: 4/3, 3/2, 16/9, etc. */
+    height: auto;
+    object-fit: cover;      /* fill the box, cropping if necessary */
+    border-radius: 12px;
+  }
+  .img-grid-2 figcaption{
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
   
   /* Stack on small screens */
   @media (max-width: 900px){
@@ -235,4 +255,54 @@
     transform: none !important;
     animation: none !important;
   }
+
+  .img-grid-3.vertical{
+    display: flex;              /* ensure vertical layout */
+    flex-direction: column;
+    gap: 18px;
+    align-items: left;        /* center each figure */
+  }
   
+  .img-grid-3.vertical img{
+    width: clamp(500, 90%, 860px) !important; /* not huge, stays responsive */
+    height: auto;
+  }
+  
+  /* Optional: limit caption width to match image */
+  .img-grid-3.vertical figure{
+    max-width: 520px;
+    width: 100%;
+  }
+
+/* Your vertical stack */
+.img-grid-2.vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+/* Make images scale without cropping, overriding any globals */
+.img-grid-2.vertical figure,
+.img-grid-2.vertical img {
+  width: auto;
+  max-width: 100%;
+  height: auto !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
+  overflow: visible !important;
+  display: block; /* avoid baseline gaps */
+}
+
+/* Size control for this block */
+.img-grid-2.vertical img {
+  width: clamp(500px, 90%, 860px); /* responsive, no crop */
+}
+
+/* Ensure the container isn’t limiting height */
+.img-grid-2.vertical figure {
+  width: 100%;
+  max-width: 860px;  /* or remove if you don’t need a cap */
+}
+
