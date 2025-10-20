@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$','$$'], ['\\[','\\]']]
+          },
+          svg: { fontCache: 'global' }
+        };
+      </script>
+      <script async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+      </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project 2 — CSCI 581</title>
+  <link rel="stylesheet" href="../site.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <a class="inline" href="../index.html">← Back to Home</a>
+      <h1>Project 2 — Image Homography and Warping</h1>
+      <p class="subtitle">Image Homography Estimation, Creative Application, Warping Comparison</p>
+    </header>
+
+    <main class="grid horizontal">
+      <article class="card">
+        <h3 class="title">Objective</h3>
+        <ul>
+            <li>In this project, you will apply geometric transformation concepts from class to perform image rectification and explore creative applications of image homography. The goal is to understand how 2D transformations can recover fronto-parallel views of planar surfaces and be used in real-world applications such as document scanning or panoramic stitching.</li>
+          </ul>
+      </article>
+      <article class="card">
+        <h3 class="title">Part 1: Image Homography Estimation</h3>
+        <p class="desc">Implement homography estimation and image warping to rectify an input image containing a planar surface (e.g., a document, a poster, or a road sign) captured at an angle.</p>
+        <p class="desc"><b>Tasks:</b> </p>
+        <ul class="desc">
+            <li>
+              Manually select 4+ point correspondences between the original image and a target rectangular region.
+            </li>
+            <li>
+              Estimate the homography matrix H (e.g., using the DLT algorithm).
+            </li>
+            <li>
+              Warp the original image using inverse mapping to obtain a rectified (fronto-parallel) view.
+            </li>
+            <li>
+              Visualize before/after results.
+            </li>
+        </ul>
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/corr1.png" alt="Correspondences">
+              <figcaption>Correspondences</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/pt1.png" alt="Selected Points">
+              <figcaption>Selected Points</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/test_out.png" alt="Original VS Rectified">
+              <figcaption>Original VS Rectified</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-2">
+            <figure>
+              <img src="./images/corr2.png" alt="Correspondences">
+              <figcaption>Correspondences</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/pt2.png" alt="Selected Points">
+              <figcaption>Selected Points</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/test2_out.png" alt="Original VS Rectified">
+              <figcaption>Original VS Rectified</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-2">
+            <figure>
+              <img src="./images/corr3.png" alt="Correspondences">
+              <figcaption>Correspondences</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/pt3.png" alt="Selected Points">
+              <figcaption>Selected Points</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/test4_out.png" alt="Original VS Rectified">
+              <figcaption>Original VS Rectified</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/a_out.png" alt="Original VS Rectified">
+              <figcaption>Original VS Rectified</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/b_out.png" alt="Original VS Rectified">
+              <figcaption>Original VS Rectified</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/c_out.png" alt="Original VS Rectified">
+              <figcaption>Original VS Rectified</figcaption>
+            </figure>
+
+          </div>
+        <p class="desc">A homography is a projective transformation that connects two images from different perspectives. It defines how points in one image correspond to points in another while at the same time, keeping straight lines and perspective consistent. To enable rectification, we do inverse mapping so that the surface looks flat and front-facing. By selecting four points from the original image, and 4 destination points (in our case we chose a rectangle), we define how each pixel on the tilted surface should allign in the rectified view. With this point correspondences we create a system of equations of 8 equations and 8 unknowns, apply SVD and reshape into a  3x3 matrix H, that essentially captures the geometric relationship between the two image planes. Once we have H, every pixel in the original image can be remapped using this transformation, determining where each pixel in the output should come from in the input image. This process adjusts the perspective for every point on the surface which removes the distortion and produces a flat, front view result, in other words, enabling rectification. 
+ </p>
+      </article>
+
+      <article class="card">
+        <h3 class="title">Part 2: Creative Application</h3>
+        <p class="desc">Use your homography implementation creatively to demonstrate a real-world or artistic application.</p>
+        <ul class="desc">
+            <li>
+              <p class="desc"><b>Document scanning:</b> </p>
+
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/swe1_out.png" alt="Front View of book">
+                  <figcaption>Front View of book</figcaption>
+                </figure>
+              </div>
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/swe2_out.png" alt="Tilted View of Book">
+                  <figcaption>Tilted View of Book</figcaption>
+                </figure>
+              </div>
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/swe3_out.png" alt="Semi-tilted View of Book">
+                  <figcaption>Semi-tilted View of Book</figcaption>
+                </figure>
+              </div>
+
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/swe4_out.png" alt="Text-only Tilted View of Book">
+                  <figcaption>Text-only Tilted View of Book</figcaption>
+                </figure>
+              </div>
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/swe5_out.png" alt="Text-only Semi-tilted View of Book">
+                  <figcaption>Text-only Semi-tilted View of Book</figcaption>
+                </figure>
+              </div>
+
+              <p class="desc">
+                For the document scanning part, I decided to grab an article from the Ole Miss yearbook. The reason behind this was to test my algorithm’s ability to apply homography not only to images but also to text. I ran multiple experiments to see which angles would work best and which ones wouldn’t achieve the intended goal. The first image shows the front view of the book for comparison purposes; we could call this the target. Of course, the homography algorithm didn’t need to do much to show the image rectified since it was already rectified. The second image was taken from the right with a good tilt. Since the text was closer to the camera and the letters in the image were legible, the text was accurately rectified, thus, we could call this a success on the text side. However, the pictures were farther away from the camera, and the homography smushed them a little bit, blurring them the further they got from the camera. The third image shows a less tilted angle that, in my opinion, yielded the best result for a realistic setting. We have a tilt, but the homography algorithm was able to rectify both the text and the pictures. The fourth image is a text-only tilted version that did not perform very well since the camera was not able to accurately capture the text in the original image. The fifth and last picture is a less tilted text-only version that performed better than the previous one and was able to render a legible scanned version of the image. In conclusion, my homography algorithm is able to simulate document scanning, but it is crucial that the original picture accurately captures the text, even if tilted, for the algorithm to correctly rectify it in the output.
+                </p>
+                
+
+            </li>
+            <li>
+              <p class="desc"><b>Car surround-view simulation:</b> </p>
+
+              <div class="img-grid-2">
+                <figure>
+                  <img src="./images/car1.png" alt="Experiment 1">
+                  <figcaption>Experiment 1</figcaption>
+                </figure>
+                <figure>
+                  <img src="./images/car2.png" alt="Experiment 2">
+                  <figcaption>Experiment 2</figcaption>
+                </figure>
+    
+              </div>
+
+              <p class="desc">
+                For the car surround-view simulation, I took four images of a parked car. The first one was facing the front (FRONT VIEW), the second one facing the back (REAR VIEW), and the other two facing the sides of the car (LEFT and RIGHT VIEW). Once I had those images, I selected four correspondence points from each one using my point picker. To create the 360° camera effect, I chose the correspondences in the shape of a trapezoid, where the two bottom points were closer together (representing the area near the car) and the top ones were farther apart (representing the area farther from the car). I repeated this for all four images and then applied my homography algorithm to warp them into their corresponding destination coordinates, which were defined relative to the canvas center. The code used a combination of homography transformations and feather-blending masks to smoothly merge the warped images onto a single canvas.  
+                
+                The resulting image simulates how a top-down 360° surround camera view would look. I ran two experiments, one during the day and one at night, to observe how lighting affected the results. As we can see from the outputs, the stitching isn’t completely perfect, and adding a fifth image of the car’s roof would have made the simulation more realistic. However, since I couldn’t capture that image myself, I added one to simulate how it might appear. Some challenges I faced included positioning the camera to capture as much of each side as possible without appearing in the frame and making sure each shot was centered. After several attempts, I managed to take well-aligned photos that produced strong results and a convincing surround-view effect.
+                </p>
+                
+
+            </li>
+            <li>
+              <p class="desc"><b>Panorama mosaicing:</b> </p>
+
+              <div class="img-grid-2">
+                <figure>
+                  <img src="./images/left_p.png" alt="Left Image">
+                  <figcaption>Left Image</figcaption>
+                </figure>
+                <figure>
+                  <img src="./images/center_p.png" alt="Center Image">
+                  <figcaption>Center Image</figcaption>
+                </figure>
+    
+              </div>
+
+              <div class="img-grid-2">
+                <figure>
+                  <img src="./images/right_p.png" alt="Right Image">
+                  <figcaption>Right Image</figcaption>
+                </figure>
+                <figure>
+                  <img src="./images/right2_p.png" alt="Rightest Image">
+                  <figcaption>Rightest Image</figcaption>
+                </figure>
+    
+              </div>
+
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/panorama.png" alt="Panorama Mosaicing">
+                  <figcaption>Panorama Mosaicing</figcaption>
+                </figure>
+              </div>
+
+              <p class="desc"> For the panorama mosaicking part of the project, my idea was to take several overlapping pictures of the Ole Miss Student Union from different angles and combine them into one wide panorama using my homography code. I took a sequence of images, starting from the left side of the building and slowly rotating the camera toward the right, making sure each photo overlapped with the next. Then, I used feature detection (with ORB) to automatically find matching points between consecutive images, computed their homographies using my homography algorithm, and warped them all into a single coordinate system. The code also used blending to smooth out the edges and avoid harsh seams between images.
+
+                What worked really well was that the algorithm successfully aligned all four of my images into one continuous view. The main structure of the Union lined up correctly, and most of the overlaps blended nicely. It was very interesting to see how the homography transformations could realistically warp and merge each shot into a single perspective.
+                
+                Some challenges I faced were related to the edges and warping distortion. Because each photo was taken by hand, slight rotations and height changes made it harder for the feature detector to match points perfectly. This caused some black gaps and bending at the top and bottom of the panorama, as seen in my final image. Another issue was lighting,even though the photos were all taken under similar conditions, small exposure differences made the blended areas a bit uneven. If I had used a tripod or more controlled overlap between frames, the final result would have looked even smoother.
+                
+                Overall, the experiment was successful. I was able to automatically generate a stitched panorama using my own homography and blending functions, and the result clearly shows how multiple 2D images can be combined into one larger mosaic.
+                
+                </p>
+            </li>
+        </ul>
+
+      </article>
+
+      <article class="card">
+        <h3 class="title">Part 3: Warping Comparison</h3>
+        <p class="desc">Compare triangular mesh warping and thin-plate spline (TPS) warping.</p>
+        <p class="desc"><b>Tasks:</b></p>
+
+        <ul class="desc">
+          <li>
+            Implement or use available routines for both warping methods.
+          </li>
+          <li>
+            Apply both to the same input (e.g., facial landmarks, grid deformation, or a planar surface).
+          </li>
+          <li>
+            Compare visually and discuss differences in smoothness, continuity, and computational cost.
+          </li>
+        </ul>
+
+        <p class="desc"><b>1: Grid Deformation</b></p>
+
+        <div class="img-grid-1">
+          <figure>
+            <img src="./images/checker_affine_tps.png" alt="Grid Deformation Triangular Mesh  vs TPS">
+            <figcaption>Grid Deformation Triangular Mesh vs TPS</figcaption>
+          </figure>
+        </div>
+
+        <p class="desc"> For this part, I compared two different warping techniques, Triangular Mesh, and Thin-Plate Spline (TPS), to see how they deform an image when given the same set of source and destination control points. I used a checkerboard pattern for this experiment because it makes distortions and bending effects easy to observe.
+
+          In the Piecewise Affine method, the image is divided into many small triangles using Delaunay triangulation. Each triangle is then warped independently using an affine transformation, and all of them are stitched back together. This creates a deformation that looks somewhat smooth overall but still has visible discontinuities along the triangle edges, especially near areas where the grid bends sharply. As we can see in the result, the checkerboard’s edges bend, but you can notice some slight breaks or irregularities in the grid lines, this happens because each triangle moves individually, and the continuity between triangles is not perfectly preserved. The advantage of this method is that it’s computationally faster, since affine transformations are simple and local, and it gives precise control over specific regions of the image. However, its main disadvantage is that the transitions between triangles are not perfectly smooth, which can cause small artifacts or visible seams when the deformation is large.
+          
+          On the other hand, the Thin-Plate Spline (TPS) produces a much smoother result. Instead of working triangle by triangle, TPS calculates a continuous transformation across the entire image based on all the control points. This creates a deformation that behaves more like bending a flexible sheet of metal that is smooth, continuous, and without noticeable edges. In the checkerboard, the TPS version shows a clean, rounded bulge at the center with perfectly smooth transitions, and all grid lines flow naturally. The main advantage of TPS is this smooth and globally consistent warping, which is ideal for applications that need realistic, continuous distortions. The downside is that it’s computationally more expensive, since the transformation depends on all points at once rather than local regions, and it can become slower with large numbers of landmarks.
+          
+          Overall, the visual comparison clearly shows that Triangular Mesh warping works well for structured or localized deformations, while TPS provides a more fluid and natural warp at the cost of higher computation time. For my experiment, I found the TPS output more visually appealing and continuous, while the Piecewise Affine version was faster and more geometric in its distortion.
+          
+          </p>
+
+        <p class="desc"><b>2: Facial Landmarks</b></p>
+
+        <div class="img-grid-2">
+          <figure>
+            <img src="./images/neutral.png" alt="Neutral Face">
+            <figcaption>Neutral Face</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/smile.png" alt="Smiling Face">
+            <figcaption>Smiling Face</figcaption>
+          </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+          <figure>
+            <img src="./images/mesh1.png" alt="Triangular Mesh 1">
+            <figcaption>Triangular Mesh 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/tps1.png" alt="TPS 1">
+            <figcaption>TPS 1</figcaption>
+          </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+          <figure>
+            <img src="./images/happy.png" alt="Happy Face">
+            <figcaption>Happy Face</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/sad.png" alt="Sad Face">
+            <figcaption>Sad Face</figcaption>
+          </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+          <figure>
+            <img src="./images/mesh2.png" alt="Triangular Mesh 2">
+            <figcaption>Triangular Mesh 2</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/tps2.png" alt="TPS 2">
+            <figcaption>TPS 2</figcaption>
+          </figure>
+
+        </div>
+
+        <p class="desc"> For this part, I used Google’s MediaPipe library to automatically extract 468 facial landmarks from my source and target images. These landmarks correspond to key points on the face such as the eyes, nose, lips, jawline, and eyebrows. Once extracted, I saved them as coordinate files and used them to perform the Triangular Mesh and the Thin-Plate Spline (TPS) transformation. The idea was to simulate changes in facial expression, for example morphing a neutral expression into a smile or a smile facial expression to a frown, by smoothly mapping the position of one set of landmarks onto another.
+
+          In the Triangular Mesh method, the face is divided into many small triangles using Delaunay triangulation. Because each triangle moves separately, there can be visible seams or small cracks between triangles, especially around detailed areas such as the mouth or eyes. In my results, the triangular mesh warp successfully transferred the general expression, but some areas looked patchy. This happens because the method does not guarantee full continuity between triangles, and blending must be used to hide those boundaries. On the other hand, this method is fast and computationally efficient, since each triangle only requires a simple affine transform.
+          
+          The Thin-Plate Spline (TPS) method, creates a global, smooth transformation across the entire face. Instead of warping triangles independently, TPS bends smoothly based on how the landmarks move. This results in a more natural and continuous transition between features making the skin looks smoother. In my experiment, the TPS warp produced a cleaner and more realistic result, especially around curved regions like the lips. However, it also required more computation, since every pixel depends on all the landmarks at once.
+          
+          In general, I would say the TPS does a much better job than the Triangular Mesh since it produces a smoother result in practical use. 
+          
+          </p>
+
+
+        <p class="desc"><b>3: Planar Surface</b></p>
+
+        <div class="img-grid-2">
+          <figure>
+            <img src="./images/text.png" alt="Text">
+            <figcaption>Text</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/sign.png" alt="Sign">
+            <figcaption>Sign</figcaption>
+          </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+          <figure>
+            <img src="./images/text_twist_mesh.jpg" alt="Text Triangular Mesh">
+            <figcaption>Text Triangular Mesh</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/text_twist_tps.jpg" alt="Text TPS">
+            <figcaption>Text TPS</figcaption>
+          </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+          <figure>
+            <img src="./images/sign_twist_mesh.jpg" alt="Sign Triangular Mesh">
+            <figcaption>Sign Triangular Mesh</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/sign_twist_tps.jpg" alt="Sign TPS">
+            <figcaption>Sign TPS</figcaption>
+          </figure>
+
+        </div>
+
+        <p class="desc"> For this section, I applied both Triangular Mesh and Thin-Plate Spline (TPS) warping methods on flat, planar surfaces such as a road sign and a text image. I wanted to simulate a geometric distortion, in this case twisting of the image and observe how each algorithm handles structured shapes and straight lines.
+          I first generated a grid of control points that were evenly spaced in a rectangular region of the image, which would represent the area to be warped. These points were then morphed using a sinusoidal function to create a smooth deformation in the form of a wave. Both methods used the same set of control points: the source grid represented the original planar layout, and the destination grid represented the wavy version.
+          
+          In the Triangular Mesh warp, the rectangular grid was divided into triangles using Delaunay triangulation. Each triangle was then warped independently using affine transformations. This technique preserved local geometry very well but introduced a lot of discontinuities at triangle boundaries. In my results, this appeared as broken edges, especially noticeable in images with strong outlines like the “SMILE” text and the road sign. Straight lines became jagged, and edges looked segmented, showing the independence of each triangular transformation. The main advantages of this method are speed and stability, it’s simple, fast to compute, and avoids over-smoothing, but in my opinion the results are not good enough to be used.
+          
+          The Thin-Plate Spline (TPS) warp treated the entire image as a continuous sheet, and it produced globally coherent deformations. The resulting images showed smooth and natural bending without the cracks or discontinuities seen in the mesh method. Curves and edges remained visually continuous, and the distortion followed the wavy pattern in a very natural way. However, this global nature comes with higher computational cost and sometimes straight edges can become softly curved even in areas that should stay flat.
+          
+          Based on my results, TPS produced more realistic and visually coherent warps for flat surfaces.
+          </p>
+
+
+      </article>
+
+    </main>
+
+    <footer>
+      <span>© <span id="y"></span> · CSCI 581 Portfolio</span>
+      <span><a class="inline" href="../index.html">Home</a></span>
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
