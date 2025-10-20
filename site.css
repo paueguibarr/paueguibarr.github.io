@@ -375,4 +375,10 @@
   text-align: center;
 }
 
+.rotate-grid img {
+  transform: rotate(90deg);
+  transform-origin: center center;
+  display: block;
+  margin: auto;
+}
 
