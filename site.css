@@ -220,20 +220,30 @@
     text-align: center;
   }
 
-  .img-grid-2{
+  .img-grid-2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(160px, 1fr));
     gap: 12px;
     align-items: start;
   }
-  .img-grid-2 img{
+  
+  /* ✅ Full image visible — no cropping */
+  .img-grid-2 img {
     width: 100%;
-    aspect-ratio: 4 / 3;   /* choose the shape you want: 4/3, 3/2, 16/9, etc. */
-    height: auto;
-    object-fit: cover;      /* fill the box, cropping if necessary */
+    height: auto;               /* keep natural proportions */
+    object-fit: contain;        /* show entire image inside the box */
     border-radius: 12px;
   }
-  .img-grid-2 figcaption{
+  
+  /* Optional: center images if they have different heights */
+  .img-grid-2 figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .img-grid-2 figcaption {
     margin-top: 6px;
     font-size: 13px;
     color: var(--muted);
@@ -305,4 +315,64 @@
   width: 100%;
   max-width: 860px;  /* or remove if you don’t need a cap */
 }
+
+/* Make the main grid act as a vertical stack of rows with big spacing */
+.wrap > main.grid{
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 40px !important;         /* <-- space between the rows */
+}
+
+/* Each .row holds TWO cards side-by-side */
+.wrap > main.grid > .row{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 24px;                    /* space between the two cards in a row */
+}
+
+/* Ensure cards don't fight sizing */
+.wrap > main.grid > .row > .card{
+  margin: 0;
+  width: 100%;
+}
+
+/* Mobile: stack cards */
+@media (max-width: 900px){
+  .wrap > main.grid > .row{
+    grid-template-columns: 1fr;
+  }
+}
+
+.img-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;   /* single column */
+  gap: 16px;                    /* space between images */
+  align-items: start;
+}
+
+/* Full image visible — no cropping */
+.img-grid-1 img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;          /* keeps full image in view */
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto;               /* centers if smaller than container */
+}
+
+/* Optional: figure wrapper for captioned images */
+.img-grid-1 figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.img-grid-1 figcaption {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
 
