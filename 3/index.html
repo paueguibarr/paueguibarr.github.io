@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$','$$'], ['\\[','\\]']]
+          },
+          svg: { fontCache: 'global' }
+        };
+      </script>
+      <script async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+      </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project 3 — CSCI 581</title>
+  <link rel="stylesheet" href="../site.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <a class="inline" href="../index.html">← Back to Home</a>
+      <h1>Project 3 — Object Detection and Human–Object Interaction Analysis</h1>
+      <p class="subtitle">Lightweight Object Detection, Non-Maximum Suppression (NMS), Human–Object Interaction (HOI) Analysis using VLMs</p>
+    </header>
+
+    <main class="grid horizontal">
+      <article class="card">
+        <h3 class="title">Objective</h3>
+        <ul>
+            <li>The goal of this project is to deepen your understanding of object detection pipelines and extend that knowledge to higher-level visual reasoning. </li>
+            <ul>
+                <li>In Part 1 and 2, you will train a lightweight object detection model, then implement non-maximum suppression (NMS) to refine detection results. </li>
+                <li>In Part 3, you will explore human–object interaction (HOI) understanding using vision-language models (VLMs) in a zero-shot setting, analyzing how modern models interpret interactions between humans and objects.</li>
+            </ul>
+          </ul>
+      </article>
+      <article class="card">
+        <h3 class="title">Part 1: Lightweight Object Detection</h3>
+        <p class="desc">Implement and train a lightweight detection model (SSD, Faster R-CNN with MobileNet, or YOLO). Object detection datasets are typically larger than the toy example datasets like MNIST used in image classification, here is a banana detection dataset that can be used, where the authors took photos of bananas and generated 1000 banana images with different rotations and sizes. </p>
+        <p class="desc"><b>Tasks:</b> </p>
+        <ul class="desc">
+            <li>
+                Plot training loss curves (class error and bounding box error).
+            </li>
+            <li>
+                Show 5 sample detections. 
+            </li>
+            <li>
+                Test the your detection model with your own banana images. Can you find any failure cases? Provide a few failure cases if you can find and discuss the possible reasons that caused the detection to fail. 
+            </li>
+        </ul>
+
+        <div class="img-grid-1">
+            <figure>
+              <img src="./images/training_loss.png" alt="Loss Curve">
+              <figcaption>Loss Curve</figcaption>
+            </figure>
+
+          </div>
+
+        <p class="desc">The loss curve shows that both the classification error and the bounding box mean absolute error (MAE) decrease rapidly during the first few epochs and then gradually stabilize. This tells us that the model quickly learned to detect and localize objects accurately within the early stages of training and then fine-tuned its performance as it continued. The fact that both curves converge smoothly and remain very low suggests that the model is well-optimized, with no signs of overfitting or instability.</p>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/og_ssd1.png" alt="Original Image 1">
+              <figcaption>Original Image 1</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/ssd1.png" alt="After SSD on image 1">
+              <figcaption>After SSD on image 1</figcaption>
+            </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/og_ssd2.png" alt="Original Image 2">
+              <figcaption>Original Image 2</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/ssd2.png" alt="After SSD on image 2">
+              <figcaption>After SSD on image 2</figcaption>
+            </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/og_ssd3.png" alt="Original Image 3">
+              <figcaption>Original Image 3</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/ssd3.png" alt="After SSD on image 3">
+              <figcaption>After SSD on image 3</figcaption>
+            </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/og_ssd4.png" alt="Original Image 4">
+              <figcaption>Original Image 4</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/ssd4.png" alt="After SSD on image 4">
+              <figcaption>After SSD on image 4</figcaption>
+            </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/og_ssd5.png" alt="Original Image 5">
+              <figcaption>Original Image 5</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/ssd5.png" alt="After SSD on image 5">
+              <figcaption>After SSD on image 5</figcaption>
+            </figure>
+
+        </div>
+
+        <p class="desc"> These results show that our SSD algorithm is successfully detecting the banana, since most of the predicted boxes are concentrated around the correct area where the banana is located. Although there are a few overlapping or larger boxes that are not perfectly tight around the object, this is a common behavior before applying Non-Maximum Suppression (NMS). NMS will remove redundant or low-confidence boxes that overlap significantly with others, leaving only the most accurate detection. Overall, this demonstrates that the model has learned to find the banana.</p>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/test1_ssd.png" alt="Test 1">
+              <figcaption>Test 1</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/test2_ssd.png" alt="Test 2">
+              <figcaption>Test 2</figcaption>
+            </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/test3_ssd.png" alt="Test 3">
+              <figcaption>Test 3</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/test4_ssd.png" alt="Test 4">
+              <figcaption>Test 4</figcaption>
+            </figure>
+
+        </div>
+
+        <div class="img-grid-2">
+            <figure>
+              <img src="./images/test5_ssd.png" alt="Test 5">
+              <figcaption>Test 5</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/test6_ssd.png" alt="Test 6">
+              <figcaption>Test </figcaption>
+            </figure>
+
+        </div>
+
+  
+  
+        <p class="desc">When testing the SSD model with my own banana images, the algorithm was not able to correctly detect the real bananas. In all cases, the model either predicted random areas or focused on unrelated objects in the background. This failure likely happened because the model was trained only on the synthetic banana dataset, which has very simple and clean images with plain backgrounds. My real-world images had much more variation in lighting, perspective, and background clutter, which made it harder for the model to generalize. Another possible reason is that the training data didn’t include enough examples of different banana shapes, colors, or contexts, so the model couldn’t recognize bananas in new environments. Overall, this shows that the model performs well on the training domain but lacks robustness when exposed to real-world conditions. 
+ </p>
+      </article>
+
+      <article class="card">
+        <h3 class="title">Part 2: Non-Maximum Suppression (NMS)</h3>
+        <p class="desc">Implement NMS to process the object detector’s output. </p>
+        <ul class="desc">
+            <li>Visualize outputs before/after NMS. </li>
+
+            <div class="img-grid-1">
+                <figure>
+                  <img src="./images/ssd_nms1.png" alt="NMS on SSD Test 1">
+                  <figcaption>NMS on SSD Test 1</figcaption>
+                </figure>
+              </div>
+      
+              <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/ssd_nms2.png" alt="NMS on SSD Test 2">
+                    <figcaption>NMS on SSD Test 2</figcaption>
+                  </figure>
+                </div>
+      
+                <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/ssd_nms3.png" alt="NMS on SSD Test 3">
+                    <figcaption>NMS on SSD Test 3</figcaption>
+                  </figure>
+                </div>
+      
+                <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/ssd_nms4.png" alt="NMS on SSD Test 4">
+                    <figcaption>NMS on SSD Test 4</figcaption>
+                  </figure>
+                </div>
+      
+                <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/ssd_nms5.png" alt="NMS on SSD Test 5">
+                    <figcaption>NMS on SSD Test 5</figcaption>
+                  </figure>
+                </div>
+
+            <li> Compare with PyTorch’s NMS implementation. Any difference? </li>
+
+            <div class="img-grid-1">
+                <figure>
+                  <img src="./images/pytorch1.png" alt="Pytorch Comparison 1">
+                  <figcaption>Pytorch Comparison 1</figcaption>
+                </figure>
+              </div>
+      
+              <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/pytorch2.png" alt="Pytorch Comparison 2">
+                    <figcaption>Pytorch Comparison 2</figcaption>
+                  </figure>
+                </div>
+      
+                <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/pytorch3.png" alt="Pytorch Comparison 3">
+                    <figcaption>Pytorch Comparison 3</figcaption>
+                  </figure>
+                </div>
+      
+                <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/pytorch4.png" alt="Pytorch Comparison 4">
+                    <figcaption>Pytorch Comparison 4</figcaption>
+                  </figure>
+                </div>
+      
+                <div class="img-grid-1">
+                  <figure>
+                    <img src="./images/pytorch5.png" alt="Pytorch Comparison 5">
+                    <figcaption>Pytorch Comparison 5</figcaption>
+                  </figure>
+                </div>
+
+                When comparing my custom NMS implementation with PyTorch’s built-in NMS, both produced almost identical results. The boxes that were kept after suppression were the same, with only very small pixel-level differences caused by floating-point precision. The small variations mainly came from the way I selected the top anchors before applying NMS or from how each method handles ties when two boxes have the same confidence score. In general, PyTorch’s implementation is much faster, while my version runs slower since it uses just a Python loop. Overall, both methods perform the same task effectively, but PyTorch’s version is more efficient, consistent, and better for larger or more complex detection models.<br><br>
+
+            <li>Discuss its purpose and limitations. </li>
+            The main purpose of Non-Maximum Suppression (NMS) is to remove redundant or overlapping bounding boxes so that the model only keeps the most confident detections. Without NMS, an object might be surrounded by multiple boxes that all predict the same thing, which makes the results messy and hard to interpret. By keeping only the box with the highest score and suppressing the rest, NMS helps make the final detection cleaner and more accurate. <br> However, NMS also has some limitations. It can sometimes remove valid boxes if two objects are close together or overlapping, which leads to missed detections. It also relies heavily on a fixed IoU threshold, and choosing the wrong value can either keep too many boxes or remove too many. Another limitation is that it treats each detection independently and doesn’t consider context, meaning it can’t handle complex situations like occlusions or multiple objects interacting.
+        </ul>
+
+      </article>
+
+      <article class="card">
+        <h3 class="title">Part 3: Human–Object Interaction (HOI) Analysis using VLMs</h3>
+        <p class="desc">Perform zero-shot HOI analysis using VLMs on a subset of HICO-DET dataset (huggingface zhimeng/hico_det · Datasets at Hugging Face). </p>
+        <p class="desc"><b>Tasks:</b></p>
+
+        <ul class="desc">
+          <li>
+            Use one (or more) open-source or closed-source VLMs (e.g., Gemini, GPT, LLaVA, Qwen) to predict human–object interactions.
+            <ul>
+                <li>Come up with your prompt to guide the VLMs to predict &lt;interaction object&gt;. For example, &lt;hold apple&gt;, &lt;ride bicycle&gt;.  </li>
+            </ul>
+          </li>
+          <li>
+            Can you identify a few failure cases where VLMs fail to prediction the HOI classes for the given images? If so, discuss the possible reasons. 
+          </li>
+          <li>
+            Give it a try to fix the failure cases via better prompts or few-shot examples (in-context learning). Discuss if your solution works or the failure cases still cannot be solved. 
+          </li>
+        </ul>
+
+        <p class="desc"><b>Base Prompt: </b></p>
+
+        <p class="desc"> "You are an HOI (human-object interaction) detector. Given an image: Look for all the people in the image. For each person, list what they are doing WITH physical objects. Use the the format &lt;interaction object&gt;. It is important you keep the format brackets and order interaction -> object. Here are some examples: &lt;ride horse&gt; &lt;hold umbrella&gt; &lt;eat pizza&gt; Make sure to use short verbs (ride, hold, eat, sit_on, carry, throw, etc.). Only include interactions that are clearly visible. Do NOT describe the scene in sentences. If no clear interaction: output &lt;no_interaction&gt;. Now analyze this image and list the interactions:"</p>
+        <p class="desc"><b>Results: </b></p>
+
+        <div class="img-grid-1">
+          <figure>
+            <img src="./images/hoi1.png" alt="VLMs HOI Comparison">
+            <figcaption>VLMs HOI Comparison</figcaption>
+          </figure>
+        </div>
+
+        <div class="img-grid-1">
+            <figure>
+              <img src="./images/hoi2.png" alt="VLMs HOI Comparison">
+              <figcaption>VLMs HOI Comparison</figcaption>
+            </figure>
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/hoi3.png" alt="VLMs HOI Comparison">
+              <figcaption>VLMs HOI Comparison</figcaption>
+            </figure>
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/hoi4.png" alt="VLMs HOI Comparison">
+              <figcaption>VLMs HOI Comparison</figcaption>
+            </figure>
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/hoi5.png" alt="VLMs HOI Comparison">
+              <figcaption>VLMs HOI Comparison</figcaption>
+            </figure>
+          </div>
+
+        <p class="desc"> For this project I decided to test the most powerful VLMs models of the moment. The list includes GPT, Gemini, Deepseek, Gwen, Grok, and Claude.  GPT is good at context-aware reasoning, Gemini is strong in visual understanding and is generally known for being good at HOI tasks, DeepSeek is good at generating creative or language rich responses, Qwen is good at structured text understanding, Grok shows good common sense reasoning and scene interpretation, finally, Claude is good at following instructions and concise reasoning. Because of all of this reasons, I decided to pick these models to test on HOI. <br>
+
+            From the results we can see that most models performed very good across the ten examples. But what surprised me the most is that most of them were able to identify interactions far beyond what was labeled in the ground truth. All the relationships highlighted in purple are pairs that I considered correct but that weren’t in the ground truth, and the green pairs are the ones the models were able to match with the ground truth labels. We notice that the best models were GPT-5 and Gemini, which makes sense if we take into account the power and strengths of those models. The only errors I found were a hallucination from gemini and a confusion from GPT, which I believe that the hallucination is the most severe error. Not so far behind there is Qwen that was generally correct on most of the tests but confused the elephants with rocks (same color) and confused the verb in an interaction (hold with wear). Claude and Grok had a similar performance, both having slight hallucinations and confusion of objects, but overall had the right idea in most cases. Finally, Deepeek performed extremely poorly, hallucinating on all tests and failing to detect any but one interaction (no_interaciton). DeepSeek tends to hallucinate because it relies heavily on language priors rather than grounded visual understanding. Its training emphasizes generating descriptive, fluent text from large-scale internet data rather than aligning visual evidence with precise object interactions. As a result, when it sees a scene with humans, it often “fills in” likely actions (like <hold racket> or <ride bike>) based on common human–object pairs it has learned from text, even if those objects aren’t actually visible. From the results we can conclude that the best models for HOI are GPT and Gemini, and the worst one is DeepSeek and should not be used for these kind of tasks.  
+          
+          </p>
+        <p class="desc"><b>Post Prompt Engineering: </b></p>
+
+        <p class="desc">You are an HOI (human–object interaction) detector.
+            Your goal is to identify visible human actions involving physical contact or direct use of objects in the image.
+            Instructions:
+            Look for all humans in the image.
+            For each human, describe only what they are physically doing with visible objects.
+            Use the exact format &lt;verb object&gt; (&lt;ride horse&gt;, &lt;hold umbrella&gt;, &lt;sit_on chair&gt;).
+            Only output interactions that are clearly visible, do not infer or imagine unseen actions.
+            If the object or action is uncertain or not visible, output &lt;no_interaction&gt;.
+            Use short verbs such as hold, ride, sit_on, carry, throw, open, eat, wash, wear, etc.
+            Notes:
+            Do not describe the scene in sentences.
+            Do not guess based on context (don’t assume “ride bike” if no bike is visible).
+            Focus on what is physically happening.
+            Now analyze this image and list all visible human–object interactions.</p>
+
+        <p class="desc"><b>Result: </b></p>
+
+        <div class="img-grid-1">
+            <figure>
+              <img src="./images/prompt1.png" alt="Prompt Engineering Results">
+              <figcaption>Prompt Engineering Results</figcaption>
+            </figure>
+        </div>
+
+        <div class="img-grid-1">
+            <figure>
+              <img src="./images/prompt2.png" alt="Prompt Engineering Results cont.">
+              <figcaption>Prompt Engineering Results cont.</figcaption>
+            </figure>
+        </div>
+
+        <p class="desc"> After refining the prompt, we observed that almost all outputs remained the same, demonstrating that the issue lies less in the prompt design and more in the intrinsic limitations of the models themselves. This suggests that the errors are not primarily due to unclear instructions but rather to how each model processes visual information and aligns it with linguistic representations.
+          
+          </p>
+
+      </article>
+
+    </main>
+
+    <footer>
+      <span>© <span id="y"></span> · CSCI 581 Portfolio</span>
+      <span><a class="inline" href="../index.html">Home</a></span>
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
