@@ -382,3 +382,116 @@
   margin: auto;
 }
 
+
+/* ---------- THEME VARIABLES ---------- */
+
+/* default (light) */
+:root {
+  --code-card-bg: #f5f5fa;
+  --code-border: rgba(15, 23, 42, 0.08);
+  --code-header-bg: #e4e4f5;
+  --code-header-text: #111827;
+  --code-text: #111827;
+}
+
+/* dark mode – adjust to your existing system */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --code-card-bg: #0b1220;
+    --code-border: rgba(148, 163, 184, 0.35);
+    --code-header-bg: rgba(15, 23, 42, 0.85);
+    --code-header-text: #e5e7eb;
+    --code-text: #e5e7eb;
+  }
+}
+
+/* ---------- CODE CARD LAYOUT ---------- */
+
+.code-card {
+  max-width: 760px;            /* not full width */
+  width: 100%;
+  margin: 1.5rem auto;         /* centered under your text */
+  border-radius: 14px;
+  background: var(--code-card-bg);
+  border: 1px solid var(--code-border);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+  overflow: hidden;            /* round corners on header + body */
+}
+
+/* small header bar on top */
+.code-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.9rem;
+  background: var(--code-header-bg);
+  border-bottom: 1px solid var(--code-border);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--code-header-text);
+}
+
+/* actual code area */
+.code-card-body {
+  padding: 0.85rem 1rem 1.0rem;
+}
+
+/* pre/code styling */
+.code-block {
+  margin: 0;
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular,
+               Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--code-text);
+  white-space: pre;        /* preserve formatting */
+  overflow-x: auto;        /* horizontal scroll if needed */
+}
+
+/* Card wrapper, so it doesn't take full width */
+.flip-illusion-card {
+  max-width: 320px;           /* adjust as you like */
+  margin: 1.5rem auto;
+  text-align: center;
+}
+
+/* Small caption */
+.flip-caption {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+/* Container to center the image */
+.flip-illusion-container {
+  display: inline-block;
+  perspective: 800px;         /* gives a bit of 3D feel if you ever use rotateX/Y */
+}
+
+/* The actual image */
+.flip-illusion-img {
+  width: 256px;               /* or 64px, or 100% */
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  transform-origin: center center;
+  animation: flip-illusion 4s ease-in-out infinite;
+}
+
+/* Animation:
+   - 0–40%  : upright
+   - 50–90% : rotated 180deg (upside-down)
+   - 100%   : back to upright
+*/
+@keyframes flip-illusion {
+  0%, 40% {
+    transform: rotate(0deg);
+  }
+  50%, 90% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
