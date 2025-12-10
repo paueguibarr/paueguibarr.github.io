@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$','$$'], ['\\[','\\]']]
+          },
+          svg: { fontCache: 'global' }
+        };
+      </script>
+      <script async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+      </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project 4 — CSCI 581</title>
+  <link rel="stylesheet" href="../site.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <a class="inline" href="../index.html">← Back to Home</a>
+      <h1>Project 4 - Diffusion Models</h1>
+      <p class="subtitle">Setup, Understanding the Forward & Reverse Processes, Visual Anagrams</p>
+    </header>
+
+    <main class="grid horizontal">
+      <article class="card">
+        <h3 class="title">Objective</h3>
+        <ul>
+            <li>The goal of this project is to help you build a practical understanding of diffusion models, from the forward noising process to iterative denoising and sampling. </li>
+            <ul>
+                <li>In Part 1, you will implement the forward diffusion process and experiment with both traditional denoising (Gaussian filtering) and a pre-trained diffusion model to understand how noise is added and removed. </li>
+                <li>In Part 2, you will work with a pre-trained diffusion model to perform sampling, explore classifier-free guidance, and apply the model to a creative task.</li>
+                <li>In Part 3 (graduate students only), you will explore a recent research paper on visual anagrams (CVPR 2024) and generate multi-view optical illusions using diffusion models.</li>
+                <li>In Part 4 (optional, extra credit 33%), you will train your own denoising U-Net on MNIST and implement a full DDPM pipeline.</li>
+            </ul>
+          </ul>
+      </article>
+      <article class="card">
+        <h3 class="title">Part 0: Setup</h3>
+        <p class="desc"><b>Tasks and Deliverables:</b> </p>
+        <ul class="desc">
+            <li>
+              Text-to-image sampling with provided prompts: For each of the three provided text prompts (see Project_4.ipynb in the section of Sampling from the Model, promtps = [`an oil painting of a snowy mountain village`, ...]), generate an image using the DeepFloyd IF model and display both the prompt and the generated result. Briefly comment on the quality of each output and how well it matches the prompt. Try at least two different values of num_inference_steps and mention anything you observe from changing this parameter.
+            </li>
+            <li>
+              Random seed used: <b>333</b>
+            </li>
+        </ul>
+
+        <div class="img-grid-1">
+            <figure>
+              <img src="./images/20_it.png" alt="20 num_inference_steps">
+              <figcaption>20 num_inference_steps</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/500_it.png" alt="500 num_inference_steps">
+              <figcaption>500 num_inference_steps</figcaption>
+            </figure>
+
+          </div>
+
+          <div class="img-grid-1">
+            <figure>
+              <img src="./images/1000_it.png" alt="1000 num_inference_steps">
+              <figcaption>1000 num_inference_steps</figcaption>
+            </figure>
+
+          </div>
+
+          
+
+          
+
+          <p class="desc">For this task, I decided to try 20, 500, and 1000 iterations for the variable <b>num_inference_steps</b>. We know that this variable is an integer between 1 and 1000, indicating how many denoising steps to take, in which lower is faster, but at the cost of reduced quality. 
+          From the leftmost image, I noticed that 20 iterations was enough to produce a decent quality iamge. The oil painting of a snowy mountain is simple but meets the requirements, the man weating a hat is actually pretty realistic. and in my opinion was the best out of the three experiments. Finally, the rocketship on 20 iterations does look overly simplified, there are a lot of straight lines that make the image look like a simple drawing.
+        Next we have the 500 iteration images. The village in this experiment has a lot of details, but in my opinion it looks more like a cartoon than an oil painting. I believe that the model tried to add too many details and stuff to the image to "improve" the quality, but instead just made the image more cartoonish. For some reason, the more iterations the older the model makes the man in the picture. In this case I see a lot of shadows and details in the man and in the hat, however, I feel like the model got confused and thought this should have been a painting like image as well, when in fact the prompt did not ask for that. Thirdly, the rocketship on 500 iterations looks better than the one before but looks extremely simple compared to the other two images with the same numbers of iterations. 
+      Lastly I tried using the maximum number of iterations for my last run, 1000. I wanted to see what "maximum quality" I could get. The village is definately the best out out of the three experiments, it still has a lot of details and elements, but it doesn’t look to cartoonish, but instead looks like an actual oil painting. In this case, for the man with the hat, I see a much more realistic image of a man, but I found it interesting that extra iterations made the man look even older than the frist two. I guess the shadows added a lot of quality as well, but in my opinion the 20 iteration man with a hat was the best one. Finally, the rocket kind of improved at 1000 iterations but almost nonsignificantly compared to the other cases. There is more detail in the image but it is still a very simple and cartoonish image of a rocket. </p>
+
+
+      </article>
+
+      <article class="card">
+        <h3 class="title">Part 1: Understanding the Forward & Reverse Processes</h3>
+        <p class="desc"><b>1.1 Forward Process (Adding Noise)</b> </p>
+
+        <p class="desc"><b>Tasks</b> </p>
+        <ul class="desc">
+            <li>Implement a function noisy_im = forward(im, t) that takes an image and a timestep and returns the noisy version of the image.</li>
+            <li>You need to use the list alphas_cumprod variable, which contains the $\bar{a}_t$ for all $t \in [0, 999]$. </li>
+            <li>Apply your function to a test image at t = 250, 500, 750 and display the results.</li>
+
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-dots">
+                  <span class="code-dot red"></span>
+                  <span class="code-dot yellow"></span>
+                  <span class="code-dot green"></span>
+                </div>
+                <span>Python · forward() implementation</span>
+              </div>
+            
+              <div class="code-card-body">
+                <pre class="code-block"><code>
+        import torch
+
+        def forward(im, t):
+            """
+            im: is the clean image x0 with shape (1, 3, 64, 64) tensor in [-1, 1]
+            t: integer timestep 0-999 that controls how much noise we add
+            returns: im_noisy (1, 3, 64, 64) tensor noisy version of the image
+            """
+            # alpha
+            # alphas_cumprod is a 1d tensor that stores all alphas that scheduler uses
+            # so if we pick [t] we get a single value (timestep t)
+            # alpha is a scalar tensor
+            alpha = alphas_cumprod[t]
+        
+            # compute coefficients for formula
+            # how much of og img we keep
+            sqrt_alpha = torch.sqrt(alpha)
+            # how much noise to add
+            sqrt_one_minus_alpha = torch.sqrt(1 - alpha)
+        
+            # noise epsilon ~ N(0,1)
+            # tensor same shape as im filled with rand vals from normal dist
+            # (gasuss noise)
+            eps = torch.randn_like(im)
+        
+            # apply forward formula
+            im_noisy = sqrt_alpha * im + sqrt_one_minus_alpha * eps
+            return im_noisy
+                  
+                </code></pre>
+              </div>
+            </div>
+            
+              
+
+            <div class="img-grid-3">
+                <figure>
+                  <img src="./images/t_250.png" alt="Noise at t=250">
+                  <figcaption>Noise at t=250</figcaption>
+                </figure>
+
+                <figure>
+                  <img src="./images/t_500.png" alt="Noise at t=500">
+                  <figcaption>Noise at t=500</figcaption>
+                </figure>
+
+                <figure>
+                  <img src="./images/t_750.png" alt="Noise at t=750">
+                  <figcaption>Noise at t=750</figcaption>
+                </figure>
+              </div>
+      
+            
+        </ul>
+
+        <p class="desc"><b>1.2 Traditional Denoising (Gaussian Blur)</b> </p>
+
+        <p class="desc"><b>Tasks</b> </p>
+        <ul class="desc">
+            <li>Take the three noisy images from Part 1.1 at timesteps $t = 250, 500, 750.</li>
+            <li>For each noisy image, apply Gaussian filtering. Tune the blur parameters (kernel size or $\sigma$) to get your best denoised result for each timestep. </li>
+            
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-dots">
+                  <span class="code-dot red"></span>
+                  <span class="code-dot yellow"></span>
+                  <span class="code-dot green"></span>
+                </div>
+                <span>Python · gaussian_denoise() implementation</span>
+              </div>
+            
+              <div class="code-card-body">
+                <pre class="code-block"><code>
+      import torchvision.transforms.functional as tf
+
+      def gaussian_denoise(im, kernel_size=7, sigma=1.5):
+          """
+          im: (1, 3, 64, 64) tensor our noisy image
+          kernel_size = the bigger the blurier
+          sigma: how strung the blur is (sd of gauss)
+          returns: (1, 3, 64, 64) blurred tensor
+          """
+          # remove batch dim for tf.gaussian_blur: (3, 64, 64) by taking first image
+          im_3ch = im[0]
+      
+          # apply gaussian blur
+          im_blur = tf.gaussian_blur(im_3ch, kernel_size=kernel_size, sigma=sigma)
+      
+          # add batch dimension back: (1, 3, 64, 64)
+          return im_blur.unsqueeze(0)
+                  
+                </code></pre>
+              </div>
+            </div>
+
+            <div class="img-grid-1">
+                <figure>
+                  <img src="./images/gaussian.png" alt="Gaussian Blur at each timestep">
+                  <figcaption>Gaussian Blur at each timestep</figcaption>
+                </figure>
+              </div>
+
+        </ul>
+
+        <p class="desc"><b>1.3 One-Step Denoising (Using a Pretrained UNet)</b> </p>
+
+        <p class="desc"><b>Tasks</b> </p>
+        <ul class="desc">
+            <li>Take the three noisy images from Part 1.1 at timesteps $t = 250, 500, 750$</li>
+            <li>- Use the pretrained UNet, predict the noise $\hat{\epsilon}$ and then denoise the imaage using Equation 1.3</li>
+            <li>Show the original image, the noisy image, and the estimate of the original (clean) image</li>
+            
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-dots">
+                  <span class="code-dot red"></span>
+                  <span class="code-dot yellow"></span>
+                  <span class="code-dot green"></span>
+                </div>
+                <span>Python · One-Step Denoising implementation</span>
+              </div>
+            
+              <div class="code-card-body">
+                <pre class="code-block"><code>
+      # Use the provided prompt embedding
+      # grab embedding for that prompt
+      prompt_embeds = prompt_embeds_dict["a high quality photo"]
+      
+      with torch.no_grad():  # no gradients to save memory
+        for t in [250, 500, 750]:
+          print(f"\nTimestep t = {t}")
+      
+          # Get alpha bar
+          alpha_cumprod = alphas_cumprod[t]
+      
+          # Run forward process
+          # ===== your code here! =====
+      
+          # create im_noisy: test_im passed through the forward process
+          im_noisy = forward(test_im, t)
+          # ===== end of code =====
+      
+          # Estimate noise in noisy image using the UNet
+          # given this noisy img at timestep t,what noise do we think
+          # is inside it?
+          # conditioning from the text prompt and return a tuple and take
+          # the first element which is the prediction tensor
+          noise_est = stage_1.unet(
+              # move to GPU and half precision
+              im_noisy.half().cuda(),
+              t,
+              encoder_hidden_states=prompt_embeds,
+              return_dict=False
+          )[0]
+      
+          # Take only first 3 channels, and move result to cpu
+          noise_est = noise_est[:, :3].cpu()
+      
+          # Remove the noise
+          # ===== your code here! =====
+      
+          # compute coefficients
+          sqrt_alpha = torch.sqrt(alpha_cumprod)
+          sqrt_one_minus_alpha = torch.sqrt(1 - alpha_cumprod)
+      
+          # predict clean image x0 from xt and epsilon_hat:
+          # x0hat = (xt - sqrt(1 - alpha_t) * eps_hat) / sqrt(alphar_t)
+          # our model best guess of the og clean img
+          clean_est = (im_noisy - sqrt_one_minus_alpha * noise_est) / sqrt_alpha
+                  
+                </code></pre>
+              </div>
+            </div>
+
+            <div class="img-grid-1">
+                <figure>
+                  <img src="./images/1.3.png" alt="Pretrained UNet at each timestep">
+                  <figcaption>Pretrained UNet at each timestep</figcaption>
+                </figure>
+              </div>
+
+        </ul>
+
+
+        <p class="desc"><b>1.4 Iterative Denoising</b> </p>
+
+        <p class="desc"><b>Tasks</b> </p>
+        <ul class="desc">
+            <li>Create `strided_timesteps`: a list of monotonically decreasing timesteps, starting at 990, with a stride of 30, eventually reaching 0. Also initialize the timesteps using the function `stage_1.scheduler.set_timesteps(timesteps=strided_timesteps)</li>
+            <li>Complete the iterative_denoise function</li>
+            <li>Show the noisy image every 5th loop of denoising (it should gradually become less noisy)</li>
+            <li>Show the final predicted clean image, using iterative denoising</li>
+            <li>Show the predicted clean image using only a single denoising step, as was done in the previous part. This should look much worse.</li>
+            <li>Show the predicted clean image using gaussian blurring, as was done in Part 1.2.</li>
+            
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-dots">
+                  <span class="code-dot red"></span>
+                  <span class="code-dot yellow"></span>
+                  <span class="code-dot green"></span>
+                </div>
+                <span>Python · iterative_denoise implementation</span>
+              </div>
+            
+              <div class="code-card-body">
+                <pre class="code-block"><code>
+    def iterative_denoise(image, i_start, prompt_embeds, timesteps, display=True):
+    '''
+    image : starting noisy image at some timestep
+    i_start : index in timestep that corresponds to current noise level
+    prompt_embeds: text embed for a high quality photo
+    timesteps: list of timesteps and is monotonically decreasing from 990 to 0
+    display: whether to display each denoised image
+    '''
+    with torch.no_grad():
+      # each iteration we move from timestep[i] to timestep[i+1]
+      # in other words from more noisy to less noisy
+      for i in range(i_start, len(timesteps) - 1):
+        # Get timesteps
+        # t is current timestep (more noise)
+        t = timesteps[i]
+        # next timestep, smaller t, so has less noise
+        # we name it previous because is previous in time
+        prev_t = timesteps[i+1]
+  
+        # Get alphas, betas
+        # ===== your code here! =====
+  
+        # TODO:
+        # get `alpha_cumprod` and `alpha_cumprod_prev` for timestep t from `alphas_cumprod`
+        # compute `alpha`
+        # compute `beta`
+  
+        # Cumulative alphas at t and t'
+        alpha_cumprod = alphas_cumprod[t]       # alpha_bar_t
+        alpha_cumprod_prev = alphas_cumprod[prev_t]  # alpha_bar_t_prev
+  
+        # we want to make sure that the scalars are on the same device as image
+        # and store them as float
+        alpha_cumprod = alpha_cumprod.to(image.device).float()
+        alpha_cumprod_prev = alpha_cumprod_prev.to(image.device).float()
+  
+        # alpha = alpha_bar_t / alpha_bar_t_prev
+        alpha = alpha_cumprod / alpha_cumprod_prev
+        beta  = 1.0 - alpha
+  
+        # ==== end of code ====
+  
+        # Get noise estimate
+        # call pretrained unet denoiser
+        # input is the noisy image, curent timestep to tell the model how much
+        # noise to expect, the text encoding, [0] to pick the output tensor
+        model_output = stage_1.unet(
+            image,
+            t,
+            encoder_hidden_states=prompt_embeds,
+            return_dict=False
+        )[0]
+  
+        # Split estimate into noise and variance estimate
+        noise_est, predicted_variance = torch.split(model_output, image.shape[1], dim=1)
+  
+        # Eq (6) and (7) of DDPM
+        # ===== your code here! =====
+  
+        # TODO:
+        # compute `pred_prev_image`, the DDPM estimate for the image at the
+        # next timestep, which is slightly less noisy. Use the equation for
+        # x_t' in the notes above.
+  
+        # estimate x0 from xt and epsilon_hat
+        sqrt_alpha = torch.sqrt(alpha_cumprod)
+        sqrt_one_minus_alpha = torch.sqrt(1 - alpha_cumprod)
+  
+        x0_est = (image - sqrt_one_minus_alpha * noise_est) / sqrt_alpha
+  
+        # compute x_t' before adding variance
+        sqrt_alpha_prev = torch.sqrt(alpha_cumprod_prev)
+  
+        # denominator 1 - alpha_bar_t
+        denom = 1.0 - alpha_cumprod
+  
+        # coefficients for x0 and xt
+        coeff_x0 = (sqrt_alpha_prev * beta) / denom
+        coeff_xt = (torch.sqrt(alpha) * (1.0 - alpha_cumprod_prev)) / denom
+        # combine
+        pred_prev_image = coeff_x0 * x0_est + coeff_xt * image
+  
+        # add variance term v_sigma using helper
+        pred_prev_image = add_variance(predicted_variance, t, pred_prev_image)
+  
+  
+        # ==== end of code ====
+  
+        image = pred_prev_image
+  
+        # display every 5 steps or if it is penultimate
+        if display and ((i - i_start) % 5 == 0 or i == len(timesteps) - 2):
+          # with image[0] we drop the batch dim, .detach() to detach from computation graph
+          # move to CPU and make sure dtype is float convert for matplotlib and then plot
+          img_disp = (image[0].detach().cpu().float().permute(1,2,0) * 0.5 + 0.5).clamp(0,1)
+          plt.figure(figsize=(3,3))
+          plt.title(f"Iter step i={i}, t={t} → {prev_t}")
+          plt.imshow(img_disp)
+          plt.axis("off")
+          plt.show()
+  
+        # move to cpu, cast to float, detach, convert to np
+        clean = image.cpu().float().detach().numpy()
+  
+  
+    return clean
+
+    # Please use this prompt embedding
+    prompt_embeds = prompt_embeds_dict["a high quality photo"]
+
+    # Add noise
+    i_start = 10
+    # we take the 11th timestep
+    # still fairly noisy but not max noise, start from moderate noise
+    # at t=10 = 690
+    t = strided_timesteps[i_start]
+    # return noisy image at timestep 690
+    im_noisy = forward(test_im, t).half().to(device)
+
+    # Denoise
+    # start at index 10
+    # go 10->11->12... ->last index
+    # gradually removing noise
+    # return final denoised image at timestep 0
+    clean = iterative_denoise(im_noisy,
+                              i_start=i_start,
+                              prompt_embeds=prompt_embeds,
+                              timesteps=strided_timesteps)
+                  
+                </code></pre>
+              </div>
+            </div>
+
+            <div class="img-grid-3">
+                <figure>
+                  <img src="./images/1.4_1.png" alt="t=690-510">
+                  <figcaption>t=690-510</figcaption>
+                </figure>
+
+                <figure>
+                  <img src="./images/1.4_2.png" alt="t=390-210">
+                  <figcaption>t=390-210</figcaption>
+                </figure>
+
+                <figure>
+                  <img src="./images/1.4_3.png" alt="t=90-0">
+                  <figcaption>t=90-0</figcaption>
+                </figure>
+              </div>
+
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/1.4.png" alt="Comparison">
+                  <figcaption>Comparison</figcaption>
+                </figure>
+              </div>
+
+        </ul>
+      </article>
+
+      <article class="card">
+        <h3 class="title">Part 2: Understanding the Forward & Reverse Processes</h3>
+
+        <p class="desc"><b>2.1 Diffusion Model Sampling</b> </p>
+
+        <p class="desc"><b>Tasks</b> </p>
+        <ul class="desc">
+            <li>Generate images from random noise, and show 5 results of "a high quality photo". Show 5 sampled images.</li>
+
+            <div class="img-grid-1">
+                <figure>
+                  <img src="./images/2.1.png" alt="Diffusion Model Sampling">
+                  <figcaption>Diffusion Model Sampling</figcaption>
+                </figure>
+              </div>
+
+        </ul>
+
+        <p class="desc"><b>2.2 Classifier Free Guidance</b> </p>
+
+        <p class="desc"><b>Tasks</b> </p>
+        <ul class="desc">
+            <li>Implement the iterative_denoise_cfg function</li>
+            <li>Show 5 images of "a high quality photo" with a CFG scale of $\gamma=7$</li>
+
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-dots">
+                  <span class="code-dot red"></span>
+                  <span class="code-dot yellow"></span>
+                  <span class="code-dot green"></span>
+                </div>
+                <span>Python · iterative_denoise implementation</span>
+              </div>
+            
+              <div class="code-card-body">
+                <pre class="code-block"><code>
+    def iterative_denoise_cfg(image, i_start, prompt_embeds, uncond_prompt_embeds, timesteps, scale=7, display=True):
+    with torch.no_grad():
+      for i in range(i_start, len(timesteps) - 1):
+        # Get timesteps
+        t = timesteps[i]
+        prev_t = timesteps[i+1]
+  
+        # Get alphas, betas
+        # ===== your code here! =====
+  
+        # TODO:
+        # Get `alpha_cumprod`, `alpha_cumprod_prev`, `alpha`, `beta`
+        # Feel free to copy code from part 1.4
+  
+        # Cumulative alphas at t and t'
+        alpha_cumprod = alphas_cumprod[t]       # alpha_bar_t
+        alpha_cumprod_prev = alphas_cumprod[prev_t]  # alpha_bar_t_prev
+  
+        # we want to make sure that the scalars are on the same device as image
+        # and store them as float
+        alpha_cumprod = alpha_cumprod.to(image.device).float()
+        alpha_cumprod_prev = alpha_cumprod_prev.to(image.device).float()
+  
+        # alpha = alpha_bar_t / alpha_bar_t_prev
+        alpha = alpha_cumprod / alpha_cumprod_prev
+        beta  = 1.0 - alpha
+  
+        # ==== end of code ====
+  
+        # Get cond noise estimate
+        model_output = stage_1.unet(
+            image,
+            t,
+            encoder_hidden_states=prompt_embeds,
+            return_dict=False
+        )[0]
+  
+        # Get uncond noise estimate
+        uncond_model_output = stage_1.unet(
+            image,
+            t,
+            encoder_hidden_states=uncond_prompt_embeds,
+            return_dict=False
+        )[0]
+  
+        # Split estimate into noise and variance estimate
+        noise_est, predicted_variance = torch.split(model_output, image.shape[1], dim=1)
+        uncond_noise_est, _ = torch.split(uncond_model_output, image.shape[1], dim=1)
+  
+        # Do classifier free guidance
+        # ===== your code here! =====
+  
+        # TODO:
+        # Compute the CFG noise estimate and put it in `model_output`.
+        # Hint: use `model_output` and `uncond_model_output`. Should only require
+        # one line of code
+        # eps = eps_u + scale * (eps_c - eps_u)
+        noise_est = uncond_noise_est + scale * (noise_est - uncond_noise_est)
+  
+        # ==== end of code ====
+  
+        # Eq (6) and (7) of DDPM
+        # ===== your code here! =====
+  
+        # TODO:
+        # Get `pred_prev_image`, the next less noisy image.
+        # Feel free to copy code from part 1.4
+        # Show denoised image
+  
+        # estimate x0 from xt and epsilon_hat
+        sqrt_alpha = torch.sqrt(alpha_cumprod)
+        sqrt_one_minus_alpha = torch.sqrt(1 - alpha_cumprod)
+  
+        x0_est = (image - sqrt_one_minus_alpha * noise_est) / sqrt_alpha
+  
+        # compute x_t' before adding variance
+        sqrt_alpha_prev = torch.sqrt(alpha_cumprod_prev)
+  
+        # denominator 1 - alpha_bar_t
+        denom = 1.0 - alpha_cumprod
+  
+        # coefficients for x0 and xt
+        coeff_x0 = (sqrt_alpha_prev * beta) / denom
+        coeff_xt = (torch.sqrt(alpha) * (1.0 - alpha_cumprod_prev)) / denom
+        # combine
+        pred_prev_image = coeff_x0 * x0_est + coeff_xt * image
+  
+        # add variance term v_sigma using helper
+        pred_prev_image = add_variance(predicted_variance, t, pred_prev_image)
+  
+        # ==== end of code ====
+  
+        image = pred_prev_image
+  
+      clean = image.cpu().detach().numpy()
+  
+    return clean
+  
+  generated_cfg = {}
+  num_samples = 5
+  gamma = 7.0
+  
+  with torch.no_grad():
+    for k in range(num_samples):
+      # start from pure Gaussian noise
+      init_noise = torch.randn_like(test_im).half().to(device)
+  
+      # run CFG-guided sampling from i_start=0
+      clean_cfg = iterative_denoise_cfg(
+          image=init_noise,
+          i_start=0,
+          prompt_embeds=prompt_embeds,
+          uncond_prompt_embeds=uncond_prompt_embeds,
+          timesteps=strided_timesteps,
+          scale=gamma,
+          display=False
+      )
+  
+      generated_cfg[k] = clean_cfg
+                  
+                </code></pre>
+              </div>
+            </div>
+
+
+            <div class="img-grid-1">
+                <figure>
+                  <img src="./images/2.2.png" alt="Classifier Free Guidance">
+                  <figcaption>Classifier Free Guidance</figcaption>
+                </figure>
+              </div>
+
+        </ul>
+
+
+        <p class="desc"><b>2.3 Image-to-image Translation</b> </p>
+
+        <p class="desc"><b>Tasks</b> </p>
+        <ul class="desc">
+            <li>Edits of the test image, using the given prompt at noise levels [1, 3, 5, 7, 10, 20] with text prompt "a high quality photo"</li>
+            <li>Edits of 2 of your own test images, using the same procedure.</li>
+
+            <div class="img-grid-1">
+                <figure>
+                  <img src="./images/img_transl_1.png" alt="Image Translation">
+                  <figcaption>Image Translation</figcaption>
+                </figure>
+              </div>
+
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/img_transl_2.png" alt="Image Translation Test 1: Fireplace">
+                  <figcaption>Image Translation Test 1: Fireplace</figcaption>
+                </figure>
+              </div>
+
+              <div class="img-grid-1">
+                <figure>
+                  <img src="./images/img_transl_3.png" alt="Image Translation Test 2: Meal">
+                  <figcaption>Image Translation Test 2: Meal</figcaption>
+                </figure>
+              </div>
+
+        </ul>
+
+
+  
+
+      </article>
+
+      <article class="card">
+        <h3 class="title">Part 3: Visual Anagrams</h3>
+        <p class="desc"><b>Tasks and Deliverables:</b> </p>
+        <ul class="desc">
+            <li>Implemented visual_anagrams function</li>
+            <li> A visual anagram where on one orientation "an oil painting of people around a campfire" is displayed and, when flipped, "an oil painting of an old man" is displayed.</li>
+            <li>2 more illusions of your choice that change appearance when you flip it upside down (see the appendix to generate your own prompts)</li>
+        </ul>
+
+        <div class="code-card">
+          <div class="code-card-header">
+            <div class="code-dots">
+              <span class="code-dot red"></span>
+              <span class="code-dot yellow"></span>
+              <span class="code-dot green"></span>
+            </div>
+            <span>Python · visual_anagrams implementation</span>
+          </div>
+        
+          <div class="code-card-body">
+            <pre class="code-block"><code>
+def visual_anagrams(image, i_start, prompt1_embeds, prompt2_embeds, 
+timesteps, display=True):
+"""
+image:      starting noisy image -  pure noise
+i_start:    index into timesteps to start denoising from (usually 0)
+prompt1_embeds: embedding for prompt 1
+prompt2_embeds: embedding for prompt 2 (upsidedown)
+timesteps:  list of timesteps (strided_timesteps)
+display:    if True show intermediate steps
+"""
+# making sure dtype and device match Unet
+image = image.to(device).half()
+
+with torch.no_grad():
+for i in range(i_start, len(timesteps) - 1):
+# current timestep t and next less noisy timestep t'
+t = timesteps[i]
+prev_t = timesteps[i + 1]
+
+# Cumulative alphas at t and t'
+alpha_cumprod = alphas_cumprod[t]       # alpha_bar_t
+alpha_cumprod_prev = alphas_cumprod[prev_t]  # alpha_bar_t_prev
+
+# we want to make sure that the scalars are on the same device as image
+# and store them as float
+alpha_cumprod = alpha_cumprod.to(image.device).float()
+alpha_cumprod_prev = alpha_cumprod_prev.to(image.device).float()
+
+# alpha = alpha_bar_t / alpha_bar_t_prev
+alpha = alpha_cumprod / alpha_cumprod_prev
+beta  = 1.0 - alpha
+
+# noise estimate for prompt 1 upright
+model_output1 = stage_1.unet(
+ image,
+ t,
+ encoder_hidden_states=prompt1_embeds,
+ return_dict=False
+)[0]
+noise1, predicted_variance = torch.split(model_output1, image.shape[1], dim=1)
+
+# noise estimate for prompt 2 upsidedown
+# flip image vertically (upsidedown)
+# dims is 2 since it is the height
+image_flipped = torch.flip(image, dims=[2])  # flip along height dimension
+
+model_output2 = stage_1.unet(
+ image_flipped,
+ t,
+ encoder_hidden_states=prompt2_embeds,
+ return_dict=False
+)[0]
+noise2, _ = torch.split(model_output2, image.shape[1], dim=1)
+
+# flip noise2 back so it aligns with og orientation
+noise2 = torch.flip(noise2, dims=[2])
+
+# average the two noise est to create visual anagram
+noise_est = (noise1 + noise2) / 2
+
+# eq 6 and 7
+# estimate x0 from xt and epsilon_hat
+sqrt_alpha = torch.sqrt(alpha_cumprod)
+sqrt_one_minus_alpha = torch.sqrt(1 - alpha_cumprod)
+
+x0_est = (image - sqrt_one_minus_alpha * noise_est) / sqrt_alpha
+
+# compute x_t' before adding variance
+sqrt_alpha_prev = torch.sqrt(alpha_cumprod_prev)
+
+# denominator 1 - alpha_bar_t
+denom = 1.0 - alpha_cumprod
+
+# coefficients for x0 and xt
+coeff_x0 = (sqrt_alpha_prev * beta) / denom
+coeff_xt = (torch.sqrt(alpha) * (1.0 - alpha_cumprod_prev)) / denom
+# combine
+pred_prev_image = coeff_x0 * x0_est + coeff_xt * image
+
+# add variance term v_sigma using helper
+pred_prev_image = add_variance(predicted_variance, t, pred_prev_image)
+
+image = pred_prev_image
+
+# visualize intermediate steps
+if display and ((i - i_start) % 5 == 0 or i == len(timesteps) - 2):
+img_disp = image[0].detach().cpu().float().permute(1,2,0)
+img_disp = (img_disp * 0.5 + 0.5).clamp(0,1)
+plt.figure(figsize=(3,3))
+plt.title(f"Flip illusion i={i}, t={t}→{prev_t}")
+plt.imshow(img_disp)
+plt.axis("off")
+plt.show()
+
+# final clean image as numpy
+clean = image.cpu().float().detach().numpy()
+return clean
+
+              
+            </code></pre>
+          </div>
+        </div>
+
+        <div class="img-grid-1">
+          <figure>
+            <img src="./images/anagram1.png" alt="a photo of a man / a photo of a dog">
+            <figcaption>a photo of a man / a photo of a dog</figcaption>
+          </figure>
+        </div>
+
+        <div class="flip-illusion-card">
+          <p class="flip-caption">
+            Visual Anagram: upright vs flipped
+          </p>
+          <div class="flip-illusion-container">
+            <img src="images/img_anagram1.png"
+                 alt="Visual anagram"
+                 class="flip-illusion-img">
+          </div>
+        </div>
+
+        <div class="img-grid-1">
+          <figure>
+            <img src="./images/anagram2.png" alt="a photo of the amalfi cost / a photo of a hipster barista">
+            <figcaption>a photo of the amalfi cost / a photo of a hipster barista</figcaption>
+          </figure>
+        </div>
+
+        <div class="flip-illusion-card">
+          <p class="flip-caption">
+            Visual Anagram: upright vs flipped
+          </p>
+          <div class="flip-illusion-container">
+            <img src="images/img_anagram2.png"
+                 alt="Visual anagram"
+                 class="flip-illusion-img">
+          </div>
+        </div>
+        
+
+        <div class="img-grid-1">
+          <figure>
+            <img src="./images/anagram3.png" alt="a lithograph of waterfalls / a lithograph of a skull">
+            <figcaption>a lithograph of waterfalls / a lithograph of a skull</figcaption>
+          </figure>
+        </div>
+
+        <div class="flip-illusion-card">
+          <p class="flip-caption">
+            Visual Anagram: upright vs flipped
+          </p>
+          <div class="flip-illusion-container">
+            <img src="images/img_anagram3.png"
+                 alt="Visual anagram"
+                 class="flip-illusion-img">
+          </div>
+        </div>
+
+
+
+
+      </article>
+
+    </main>
+
+    <footer>
+      <span>© <span id="y"></span> · CSCI 581 Portfolio</span>
+      <span><a class="inline" href="../index.html">Home</a></span>
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
